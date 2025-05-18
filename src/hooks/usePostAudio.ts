@@ -10,15 +10,15 @@ function float32ToBase64(float32Array: Float32Array): string {
 }
 
 export function usePostAudio() {
-  // const postAudio = (audio:Float32Array) => {
-
-  // };
-
   const { mutate } = useMutation({
-    mutationFn: (audio: Float32Array) => {
-      return axios.post("http://localhost/huggingFace/ask", {
-        body: { audio: float32ToBase64(audio) },
-      });
+    mutationFn: async (audio: Float32Array) => {
+      const res = await axios.post(
+        "http://localhost:9000/api/v1/huggingFace/ask",
+        {
+          audio: float32ToBase64(audio),
+        }
+      );
+      return res;
     },
   });
 
