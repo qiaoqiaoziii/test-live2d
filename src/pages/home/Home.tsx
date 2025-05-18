@@ -6,6 +6,7 @@ import { modelMap } from "../../models";
 import { tts } from "../../tts";
 import { Card, Select, Space, Button, Input, Spin } from "antd";
 import { useMicVAD } from "@ricky0123/vad-react";
+import { usePostAudio } from "../../hooks/usePostAudio";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).PIXI = PIXI;
 async function arrayBufferToAudioBuffer(arrayBuffer: ArrayBuffer) {
@@ -24,11 +25,13 @@ export default function Home() {
   const modelName =
     new URLSearchParams(window.location.search).get("model") || "miku";
   const [loading, setLoading] = useState(false);
+  const { postAudio } = usePostAudio();
+  const [audio, setAudio] = useState<Float32Array<ArrayBufferLike>>();
 
   const vad = useMicVAD({
     startOnLoad: false,
     onSpeechEnd: (audio) => {
-      console.log("User stopped talking", audio);
+      setAudio(audio);
     },
   });
 
@@ -85,6 +88,13 @@ export default function Home() {
     };
   }, [modelName]);
 
+  const pauseListen = () => {
+    vad.pause();
+    if (audio) {
+      postAudio(audio);
+    }
+  };
+
   return (
     <div className="size-full flex">
       <div className="w-[600px] relative">
@@ -103,7 +113,7 @@ export default function Home() {
               <Button type="primary" onClick={() => vad.start()}>
                 开始录音
               </Button>
-              <Button onClick={() => vad.pause()}>结束录音</Button>
+              <Button onClick={pauseListen}>结束录音</Button>
             </Space>
             <div>select model:</div>
             <Select
