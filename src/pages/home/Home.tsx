@@ -7,6 +7,7 @@ import { tts } from "../../tts";
 import { Card, Select, Space, Button, Input, Spin } from "antd";
 import { useMicVAD } from "@ricky0123/vad-react";
 import { usePostAudio } from "../../hooks/usePostAudio";
+import { base64ToAudioBuffer } from "../../utils/utils";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (window as any).PIXI = PIXI;
 async function arrayBufferToAudioBuffer(arrayBuffer: ArrayBuffer) {
@@ -18,6 +19,7 @@ async function arrayBufferToAudioBuffer(arrayBuffer: ArrayBuffer) {
 
   return audioBuffer;
 }
+
 export default function Home() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [text, setText] = useState("");
@@ -88,10 +90,14 @@ export default function Home() {
     };
   }, [modelName]);
 
-  const pauseListen = () => {
+  const pauseListen = async () => {
     vad.pause();
     if (audio) {
-      postAudio(audio);
+      const { audio: audioRes } = await postAudio(audio);
+      if (audioRes) {
+        const audioBuffer = await base64ToAudioBuffer(audioRes);
+        motionSync.current?.play(audioBuffer);
+      }
     }
   };
 
