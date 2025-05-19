@@ -3,11 +3,11 @@ import { getAsk } from "../service/api";
 import { float32ToBase64 } from "../utils/utils";
 
 export function usePostAudio() {
-  const { mutateAsync } = useMutation({
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async (audio: Float32Array) => {
       return getAsk(float32ToBase64(audio));
     },
   });
 
-  return { postAudio: mutateAsync };
+  return { postAudio: mutateAsync, isPending };
 }

@@ -27,7 +27,7 @@ export default function Home() {
   const modelName =
     new URLSearchParams(window.location.search).get("model") || "miku";
   const [loading, setLoading] = useState(false);
-  const { postAudio } = usePostAudio();
+  const { isPending, postAudio } = usePostAudio();
   const [audio, setAudio] = useState<Float32Array<ArrayBufferLike>>();
 
   const vad = useMicVAD({
@@ -97,6 +97,7 @@ export default function Home() {
       if (audioRes) {
         const audioBuffer = await base64ToAudioBuffer(audioRes);
         motionSync.current?.play(audioBuffer);
+        setAudio(undefined);
       }
     }
   };
@@ -116,10 +117,16 @@ export default function Home() {
           <div className="flex flex-col gap-2">
             <div>录音状态:{JSON.stringify(vad.listening)}</div>
             <Space>
-              <Button type="primary" onClick={() => vad.start()}>
+              <Button
+                loading={isPending}
+                type="primary"
+                onClick={() => vad.start()}
+              >
                 开始录音
               </Button>
-              <Button onClick={pauseListen}>结束录音</Button>
+              <Button loading={isPending} onClick={pauseListen}>
+                结束录音
+              </Button>
             </Space>
             <div>select model:</div>
             <Select
